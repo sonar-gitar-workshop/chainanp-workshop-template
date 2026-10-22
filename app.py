@@ -31,7 +31,20 @@ def create_order():
         if sku not in CATALOG:
             return jsonify({"error": "Product not found"}), 404
 
-        unit_price = item.get("unit_price_cents", CATALOG[sku])
+        unit_price = CATALOG[sku]
+        client_unit_price = item.get("unit_price_cents")
+        if client_unit_price is not None and client_unit_price != unit_price:
+            return (
+                jsonify(
+                    {
+                        "error": "Price changed",
+                        "sku": sku,
+                        "unit_price_cents": unit_price,
+                    }
+                ),
+                409,
+            )
+
         quantity = item["quantity"]
         line_items.append(
             {
